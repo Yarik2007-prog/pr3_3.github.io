@@ -58,26 +58,37 @@ function random(num) {
 }
 
 // --- функція замикання для підрахунку кліків ---
-function createClickCounter(limit) {
+const initCounter = (limit, button, baseLabel) => {
   let count = 0;
-  return function() {
+
+  const updateLabel = () => {
+    button.textContent = `${baseLabel} (залишилось: ${limit - count})`;
+  };
+
+  updateLabel();
+
+  return () => {
     if (count < limit) {
       count++;
-      console.log(`Натискання: ${count}, залишилось: ${limit - count}`);
+      updateLabel();
+      if (count >= limit) {
+        button.disabled = true; 
+        console.log(`${baseLabel}: досягнуто максимум натискань`);
+      } else {
+        console.log(`${baseLabel} — натиснуто: ${count}, залишилось: ${limit - count}`);
+      }
       return true;
     } else {
-      console.log("Більше натискати не можна!");
       alert("Ліміт натискань досягнуто!");
       return false;
     }
   };
-}
+};
 
-// --- створюємо лічильники ---
-let kickCounter = createClickCounter(6);     // максимум 6
-let specialCounter = createClickCounter(3);  // максимум 3
 
-// --- кнопки ---
+let kickCounter = initCounter(5, $btn, 'Fight');
+let specialCounter = initCounter(3, $btn2, 'Special');
+
 $btn.onclick = function() {
   if (!kickCounter()) return;
   const dmgToEnemy = random(20);
@@ -97,14 +108,14 @@ $btn2.onclick = function() {
 $btn3.onclick = function() {
   character.reset();
   enemy.reset();
+
   $btn.disabled = false;
   $btn2.disabled = false;
   document.getElementById('logs').innerHTML = '';
   addLogEntry('Бій скинуто!');
 
-  // після скидання створюємо нові лічильники
-  kickCounter = createClickCounter(6);
-  specialCounter = createClickCounter(3);
+  kickCounter = initCounter(5, $btn, 'Fight');
+  specialCounter = initCounter(3, $btn2, 'Special');
 
   console.log("Лічильники оновлено після ресету");
 };
@@ -120,3 +131,4 @@ function init() {
   addLogEntry(' Бій розпочато!');
 }
 init();
+
